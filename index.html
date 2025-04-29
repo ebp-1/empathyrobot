@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>공감요정 🤖</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hi+Melody&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Hi Melody', cursive;
+      background: linear-gradient(to bottom right, #f0f8ff, #e6f7ff);
+      color: #4a4a4a;
+      text-align: center;
+      padding: 2rem;
+    }
+    h1 {
+      color: #5a8dee;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    .robot-frame {
+      border: 3px solid #cce5ff;
+      border-radius: 20px;
+      padding: 1rem;
+      max-width: 500px;
+      margin: 0 auto;
+      background: white;
+      box-shadow: 0 0 10px rgba(150,200,255,0.3);
+    }
+    .robot-face {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .divider {
+      height: 2px;
+      background-color: #cce5ff;
+      margin: 0.5rem 0 1rem 0;
+    }
+    .section-title {
+      margin: 1rem 0 0.5rem 0;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+    .emojis {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0.5rem;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      background: #e3f2fd;
+      padding: 1rem;
+      border-radius: 10px;
+    }
+    .emojis button {
+      background: #f7fbff;
+      border: 1px solid #aad4ff;
+      border-radius: 8px;
+      padding: 0.3rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .emojis button.selected {
+      background: #aad4ff;
+      color: white;
+    }
+    textarea {
+      width: 90%;
+      max-width: 400px;
+      height: 80px;
+      margin-top: 1rem;
+      padding: 0.5rem;
+      border: 2px solid #d7c8ff;
+      background: #f3ecff;
+      border-radius: 10px;
+      resize: none;
+      font-family: 'Hi Melody', cursive;
+    }
+    button.submit-btn {
+      margin-top: 0.8rem;
+      background: #cce5ff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: 'Hi Melody', cursive;
+      font-size: 1rem;
+    }
+    .message {
+      margin-top: 1.5rem;
+      font-size: 1.2rem;
+      white-space: pre-wrap;
+      background: #fff8dc;
+      padding: 1rem;
+      border-radius: 10px;
+      margin-top: 2rem;
+    }
+    .thankyou {
+      color: #5a8dee;
+      margin-bottom: 0.5rem;
+    }
+    .empathy {
+      color: #b47eb3;
+    }
+  </style>
+</head>
+<body>
+
+<h1>공감요정 🤖</h1>
+
+<div class="robot-frame">
+  <div class="robot-face" id="robotFace">＼(^_^)/</div>
+  <div class="divider"></div>
+
+  <div class="section-title">지금 너의 감정을 선택해줘!</div>
+  <div class="emojis" id="emojiContainer">
+    <!-- 감정 버튼들은 스크립트에서 생성할게 -->
+  </div>
+
+  <div class="section-title">너의 이야기를 써줘!</div>
+  <textarea id="storyInput" placeholder="네 마음을 편하게 적어줘..."></textarea><br>
+  <button class="submit-btn" onclick="submit()">전송하기</button>
+
+  <div class="message">
+    <div class="thankyou" id="thankYouMessage"></div>
+    <div class="empathy" id="empathyMessage"></div>
+  </div>
+</div>
+
+<script>
+const emotions = {
+  happy: '😄', laugh: '😆', confused: '😶‍🌫️', tired: '🫥', smirk: '😏',
+  sad: '😢', angry: '😡', scared: '😨', love: '🥰', sleepy: '😴',
+  excited: '🤩', thinking: '🤔', cry: '😭', cool: '😎', peaceful: '😇',
+  embarrassed: '😳', worried: '😟', proud: '😌', surprised: '😮', shy: '☺️'
+};
+
+const faces = {
+  happy: '＼(＾▽＾)／', laugh: '＼(≧▽≦)／', confused: '＼(・・；)／', tired: '＼(￣︿￣)／',
+  smirk: '＼(¬‿¬ )／', sad: '＼(T＿T)／', angry: '＼(╬ಠ益ಠ)／', scared: '＼(・_・;)／',
+  love: '＼(ღ✪v✪)ღ／', sleepy: '＼(-_-)zzz／', excited: '＼(*≧∀≦*)／', thinking: '＼(¬_¬ )／',
+  cry: '＼(Ｔ▽Ｔ)／', cool: '＼(⌐■_■)／', peaceful: '＼(◡‿◡✿)／', embarrassed: '＼(⁄⁄>⁄ ▽ ⁄<⁄⁄)／',
+  worried: '＼(；￣Д￣）／', proud: '＼(๑˃̵ᴗ˂̵)／', surprised: '＼(⊙_☉)／', shy: '＼(｡•́︿•̀｡)／'
+};
+
+const messages = {
+  happy: "네가 웃을 때 세상이 빛나! 나도 행복해!", laugh: "꺄르르 웃음이 넘쳐나네! 기쁨을 나눠줘서 고마워!",
+  confused: "마음이 복잡할 때는 천천히 생각해도 괜찮아.", tired: "지친 너도 너무 소중해. 푹 쉬어야 해!",
+  smirk: "장난치는 네 모습, 정말 귀여워!", sad: "슬플 땐 참지 말고 울어도 괜찮아. 내가 옆에 있어줄게.",
+  angry: "화를 내는 것도 소중한 감정이야. 네 마음을 이해해.", scared: "무서울 땐 꼭 손 잡아줄게. 걱정 마!",
+  love: "너의 따뜻한 마음이 세상을 밝히고 있어!", sleepy: "고생 많았어. 푹 쉬자. 넌 충분히 잘하고 있어!",
+  excited: "너의 설렘이 전해졌어! 함께 즐기자!", thinking: "고민하는 너는 정말 깊은 생각을 하는 멋진 사람이야!",
+  cry: "많이 힘들었구나. 울어도 괜찮아. 내가 옆에 있어줄게.", cool: "진짜 멋져! 넌 세상에서 하나뿐인 존재야!",
+  peaceful: "평온한 네 기운이 여기까지 전해져와. 고마워!", embarrassed: "부끄러워도 괜찮아. 네 모습 모두 소중해!",
+  worried: "걱정이 많을 때도 천천히 숨 쉬어봐. 괜찮아질 거야.", proud: "스스로를 자랑스러워해! 너는 충분히 멋져!",
+  surprised: "놀랄 일이 있어도 침착하게! 넌 잘 해낼 수 있어!", shy: "수줍어하는 너, 너무 귀엽고 소중해!"
+};
+
+let selectedEmotion = "";
+
+function createEmojiButtons() {
+  const container = document.getElementById('emojiContainer');
+  for (const key in emotions) {
+    const btn = document.createElement('button');
+    btn.innerText = emotions[key];
+    btn.onclick = () => selectEmotion(key, btn);
+    container.appendChild(btn);
+  }
+}
+
+function selectEmotion(type, btn) {
+  selectedEmotion = type;
+  document.querySelectorAll('.emojis button').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+function submit() {
+  const story = document.getElementById('storyInput').value.trim();
+  if (selectedEmotion && story) {
+    document.getElementById('robotFace').innerText = faces[selectedEmotion];
+    document.getElementById('thankYouMessage').innerText = "너의 이야기 잘 들었어. 정말 고마워!";
+    document.getElementById('empathyMessage').innerText = messages[selectedEmotion];
+  } else {
+    document.getElementById('thankYouMessage').innerText = "";
+    document.getElementById('empathyMessage').innerText = "감정도 고르고, 이야기도 써줘!";
+  }
+}
+
+createEmojiButtons();
+</script>
+
+</body>
+</html>
